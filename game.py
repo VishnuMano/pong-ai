@@ -9,6 +9,7 @@ FPS = 60 # frames per second constant
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 PADDLE_WIDTH, PADDLE_HEIGHT = 20, 100
+BALL_RADIUS = 7
 
 class Paddle:
     VELOCITY = 4
@@ -26,9 +27,27 @@ class Paddle:
             self.y -= self.VELOCITY
         else:
             self.y += self.VELOCITY
-        
+
+class Ball:
+    MAX_VEL = 5
+
+    def __init__(self, x, y, radius):
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.x_vel = self.MAX_VEL
+        self.y_vel = 0
+    
+    def draw(self, win):
+        pygame.draw.circle(win, WHITE, (self.x, self.y), self.radius)
+    
+    def move(self):
+        self.x += self.x_vel
+        self.y += self.y_vel
+
+
 # drawing
-def draw(win, paddles):
+def draw(win, paddles, ball):
     win.fill(BLACK)
     
     for paddle in paddles:
@@ -39,7 +58,7 @@ def draw(win, paddles):
             continue;
         else:
             pygame.draw.rect(win, WHITE, (WIDTH//2 - (PADDLE_WIDTH//2), i, 10, HEIGHT//20))
-
+    ball.draw(win)
     pygame.display.update() # updates display and performs above drawing operations
 
 def handle_paddle_movement(keys, left_paddle, right_paddle):
@@ -55,15 +74,17 @@ def handle_paddle_movement(keys, left_paddle, right_paddle):
 
 # Event Loop
 def main():
-    run = True
+    run = True 
     clock = pygame.time.Clock()
     left_paddle = Paddle(10, HEIGHT//2 - PADDLE_HEIGHT//2, PADDLE_WIDTH, PADDLE_HEIGHT)
     right_paddle = Paddle(WIDTH - 10 - PADDLE_WIDTH, HEIGHT//2 - PADDLE_HEIGHT//2, PADDLE_WIDTH, PADDLE_HEIGHT)
+    
+    ball = Ball(WIDTH // 2, HEIGHT // 2, BALL_RADIUS)
 
     # Main Loop
     while run:
         clock.tick(FPS) # max of 60 frames per second
-        draw(WIN, [left_paddle, right_paddle])
+        draw(WIN, [left_paddle, right_paddle], ball)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -72,6 +93,8 @@ def main():
         
         keys = pygame.key.get_pressed()
         handle_paddle_movement(keys, left_paddle, right_paddle)
+
+        ball.move()
         
     pygame.quit()
 
